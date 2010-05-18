@@ -1,0 +1,26 @@
+
+This directory contains a .emacs file and emacs extensions that I found useful for programming work.
+
+If you have already a .emacs file with custom modifications, be sure to back it up so you can copy the information into these files.
+
+Copy the dot.emacs file and dot.emacs_extensions directory to your home directory and rename them to .emacs and .emacs_extensions.
+
+The .emacs file contains the following functionality:
+
+o it enables copy/paste with the terminal (very useful!)
+
+o it changes the font to something more readable
+
+o it enables perl_mode on both .pl and .t files
+
+o it assigns goto-line to M-g
+
+o it includes a number of other modules:
+
+  o sgn functions for entering POD headers etc.
+
+  o tabbar, for quickely changing between buffers using tabs.
+
+
+
+Lukas, June 2009

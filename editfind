@@ -1,0 +1,92 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use English;
+use Carp;
+use FindBin;
+use Getopt::Std;
+
+use Data::Dumper;
+
+use File::Spec;
+
+sub usage {
+  my $message = shift || '';
+  $message = "Error: $message\n" if $message;
+  die <<EOU;
+$message
+Usage:
+  $FindBin::Script
+
+  Given a list of filenames, resolve any that look like perl module or script names.
+
+  Options:
+
+    none yet
+
+EOU
+}
+sub HELP_MESSAGE {usage()}
+
+our %opt;
+getopts('',\%opt) or usage();
+
+
+my @res = map resolve($_), @ARGV;
+die "too many results\n" if @res > 5;
+foreach (@res) {
+  -f or die "$_ not found\n";
+  print "$_\n";
+}
+
+sub resolve {
+  my ($name) = @_;
+
+  my @resolvers = ( \&resolve_file,
+		    \&resolve_perlmod,
+		    \&resolve_exec,
+		  );
+
+  foreach my $res ( @resolvers ) {
+    if( my @names = $res->($name) ) {
+      return @names;
+    }
+  }
+  die "$name not found in file system, perl modules or perl scripts\n";
+}
+
+sub resolve_file {
+  my ($name) = @_;
+
+  return $name if -f $name;
+
+  return "./$name" if -f "./$name";
+  return;
+}
+
+sub resolve_perlmod {
+  my ($name) = @_;
+  return unless $name =~ /^\w+(::\w+)*$/;
+
+  my @comp = split /:+/,$name;
+  $comp[-1] .= '.pm';
+  foreach my $inc ('.','./lib',@INC) {
+    my $fn = File::Spec->catfile($inc,@comp);
+    return $fn if -f $fn;
+  }
+  return;
+}
+
+sub resolve_exec {
+  my ($name) = @_;
+
+  return if $name =~ m|/|;
+
+  return map {
+    my $path = $_;
+    my $f = File::Spec->catfile($path,$name);
+    return $f if -f $f; #<return just the one if exact match
+    grep !/~$/, glob( "$f*") #< otherwise, glob with that as the base
+  } split /:/,$ENV{PATH};
+
+}

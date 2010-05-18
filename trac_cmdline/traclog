@@ -1,0 +1,10 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use File::Spec;
+#use Config::General;
+
+open *STDOUT, '>', File::Spec->devnull or die 'cannot reopen stdout';
+open *STDERR, '>', File::Spec->devnull or die 'cannot reopen stderr';
+
+exec  $ENV{BROWSER} || 'firefox', 'http://bugs.sgn.cornell.edu/trac/cxgn/log/'.join '', @ARGV;

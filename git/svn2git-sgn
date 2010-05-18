@@ -1,0 +1,27 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use Cwd;
+
+my $repo = shift;
+my $rev  = shift || 17000;
+my $cwd  = getcwd;
+
+die "Usage $0 reponame" unless $repo;
+
+my $urlbase = 'svn+ssh://svn.sgn.cornell.edu/cxgn';
+my $command = "git svn clone";
+if (-e "authors.txt") {
+    $command .= " -Aauthors.txt ";
+} else {
+    warn "Not using an author map";
+}
+$command .= "-r$rev --no-metadata --no-minimize-url $urlbase/$repo/trunk $repo";
+system $command;
+chdir $repo or die $!;
+
+system 'git svn fetch';
+system 'git remote add origin git@github.com:solgenomics/' . $repo;
+system 'git push';
+chdir $cwd;

@@ -1,0 +1,99 @@
+#!/usr/bin/perl
+
+eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
+    if 0; # not running under some shell
+
+use strict;
+use warnings;
+
+use English;
+use Carp;
+use FindBin;
+
+use File::Basename;
+use File::Path;
+
+use Getopt::Std;
+use Pod::Usage;
+
+#use Data::Dumper;
+
+our %opt;
+getopts('n',\%opt) or pod2usage(1);
+
+@ARGV == 2 or pod2usage(1);
+
+my ($tname,$newfile) = @ARGV;
+my $tgtpath = dirname($newfile);
+
+my ($sgn_tools_location) = $FindBin::RealBin =~ m!(^.+/sgn-tools)/!;
+$sgn_tools_location && -d $sgn_tools_location
+    or die "could not figure out sgn-tools installed location";
+
+my @templatematches = ( glob("~/{T,t}emplates/$tname*"),
+                        glob("$sgn_tools_location/development/templates/$tname*"),
+                        glob("$FindBin::RealBin/templates/$tname*"),
+                      )
+  or die "No template found matching '$tname";
+
+@templatematches = grep !/~$/,@templatematches; #filter out backup files
+@templatematches == 1
+  or die "More than one template matches '$tname':\n",map {"  - $_\n"} @templatematches;
+
+my ($template) = @templatematches;
+
+#add an extension to the target file if it doesn't have one
+my (undef,undef,$ext) = fileparse($template,qr/\..+$/);
+$newfile .= $ext unless $newfile =~ /$ext$/;
+
+
+-d $tgtpath
+    or mkpath( $tgtpath, {verbose => 1})
+    or die "could not create dir '$tgtpath'";
+
+#copy the template file there
+system( cp => -aH => $template => $newfile );
+$CHILD_ERROR and die "Could not copy template from $template to $newfile: $!";
+
+exit if $opt{n};
+
+#openoffice
+if( $template =~ /\.od[pfts]$|\.sx[iwc]$|\.doc$|\.xls$|\.ppt$/ ) {
+  exec 'ooffice', $newfile;
+}
+#scripts or other things
+else {
+  $ENV{EDITOR} or die "No \$EDITOR environment variable defined, please make sure it's in your .bashrc or similar\n";
+  exec e => $newfile;
+}
+
+__END__
+
+=head1 NAME
+
+newtemplate - script to do something
+
+=head1 SYNOPSIS
+
+  newtemplate [options] template_name new_filename
+
+  Options:
+
+    -n  if passed, do not open $EDITOR after making file
+
+=head1 MAINTAINER
+
+Robert Buels
+
+=head1 AUTHOR
+
+Robert Buels, E<lt>rmb32@cornell.eduE<gt>
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2009 Boyce Thompson Institute for Plant Research
+
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

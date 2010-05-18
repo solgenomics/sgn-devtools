@@ -1,0 +1,3 @@
+#!/bin/sh
+rm -f TAGS;
+find . \( -name '*.pm' -or -name '*.pl' \) -exec etags --append -l perl -r '/[ \t]*package[ \t]*\([A-Z:a-z]+\)/\1/' {} ';'

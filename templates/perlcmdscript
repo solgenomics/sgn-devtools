@@ -1,0 +1,101 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use English;
+use Carp;
+use FindBin;
+use Getopt::Std;
+
+use Config::General;
+
+#use Data::Dumper;
+
+use constant CONFIGURATION_PATH => "$FindBin::Bin/../sb.conf";
+
+sub usage {
+    my $message = shift || '';
+    $message = "Error: $message\n" if $message;
+    die <<EOU;
+$message
+Usage:
+  $FindBin::Script [global options] command [cmd options] cmd_arg ...
+
+   Script to do something.
+
+  Commands:
+
+   Run $FindBin::Script help <command> for help on an individual
+   command.
+
+    help               Get help on an individual command.
+
+  Global Options:
+
+
+  Examples:
+
+EOU
+}
+sub HELP_MESSAGE {usage()}
+
+
+register_command( 'help', <<EOF );
+Usage: $FindBin::Script help command_name
+
+   Get help on a command.
+
+EOF
+#command to display another command's help message
+sub help {
+    my ($name,$message) = @_;
+    unless($name) {
+	($name) = @ARGV or usage();
+    }
+
+    our %help;
+    $help{$name} or die "no help available for '$name'";
+    print "ERROR: $message\n" if $message;
+    print $help{$name};
+    exit;
+}
+
+############ UTILITY SUBROUTINES
+
+#register a command with its help text
+sub register_command {
+    my ($opnames,$helptext) = @_;
+    $opnames = [$opnames] unless ref $opnames;
+    our %help;
+    our %commands;
+    foreach my $op (@$opnames) {
+	$help{$op}     = $helptext;
+	$commands{$op} = \&{"$opnames->[0]"};
+    }
+}
+
+############# MAIN CODE
+
+#lock_script() or die "$FindBin::Script already running, only run one at a time.\n";
+
+#parse the global options
+our %conf = Config::General->new( CONFIGURATION_PATH )->getall
+    or die "error reading conf file";
+
+our %global_opt;
+getopts('d:v:',\%global_opt) or usage();
+
+#set defaults
+$global_opt{d} ||= Config::CXGN::VHost->new->get_conf('itag_pipeline_base');
+
+#now execute the command
+my $opname = shift @ARGV
+    or usage;
+our %commands;
+my $op = $commands{$opname}
+    or die "unknown command '$opname'\n";
+unless($opname eq 'help') {
+    # check critical global options here
+}
+$op->();			#< execute the operation subroutine
+
+#unlock_script();

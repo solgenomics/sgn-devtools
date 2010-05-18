@@ -1,0 +1,2 @@
+#!/bin/sh
+find . -iregex ".*\.\(c\|cc\|php\|h\|hh\|cpp\|html\|pl\|pm\|cgi\|txt\|js\|css\|t\|inc\|module\|engine\)$" -exec grep -iHn -- "$1" {} ';' | perl -pe 's/(\S):/$1 :/g; s/:(\S)/: $1/g'

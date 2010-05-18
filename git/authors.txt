@@ -1,0 +1,9 @@
+rob  = Rob Buels <rmb32@cornell.edu>
+leto = Jonathan "Duke" Leto <jonathan@leto.net>
+mueller = Lukas Mueller <lam87@cornell.edu>
+naama   = Naama Menda <nm249@cornell.edu>
+tecle = Isaak Yosief Tecle <iyt2@cornell.edu>
+(no author) = Nobody
+adri = Adri Mills <am274@cornell.edu>
+aure = Aureliano Bombarely Gomez <ab782@cornell.edu>
+tomfy = Thomas Fisher-York <tly2@cornell.edu>

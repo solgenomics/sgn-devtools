@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+use Getopt::Std;
+
+my %opt;
+getopts('f:d:',\%opt);
+my $delim = $opt{d} || '\s';
+
+my @flist;
+if( $opt{f} =~ /^-?\d+$/) {
+  @flist = ($opt{f});
+}
+elsif( $opt{f} =~ /^(\d+)-(\d+)$/ ) {
+  @flist = $1..$2;
+}
+elsif( $opt{f} =~ /^(\d+)-$/ ) {
+  @flist = ($1);
+  $openend = 1;
+}
+
+while(<>) {
+  @f = split /$delim+/,$_;
+  @fields = $openend ? ($flist[0]..$#f) : @flist;
+  print join(' ',@f[@flist]);
+  print "\n";
+}
+	
