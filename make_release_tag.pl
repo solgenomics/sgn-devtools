@@ -28,7 +28,7 @@ sub fsystem(@) {
     }
 }
 
-getopts('nMmr:V:vx',\%opt) or pod2usage(1);
+getopts('nMmr:V:vpx',\%opt) or pod2usage(1);
 
 $opt{M} || $opt{m} || $opt{V}
     or pod2usage('must specify either -M, -m, or -V');
