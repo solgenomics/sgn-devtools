@@ -132,11 +132,12 @@ __END__
 
 make_release_tag.pl -  make a new release tag for the given software component name.
 
-Must specify one of -M, -m, or -V.
-
 =head1 SYNOPSIS
 
-  make_release_tag.pl [options] component_name [ remote_name ]
+  cd my_component; make_release_tag.pl [options] my_component [ remote_name ]
+
+  Must specify one of -M, -m, or -V.  Must be run from a working
+  directory inside the git repository in question.
 
   Options:
 
@@ -154,10 +155,10 @@ Must specify one of -M, -m, or -V.
      num is the current major release.
 
   -m
-     make this a minor release.  equivalent to '-V <num>', where
+     number this as a minor release.  equivalent to '-V <num>', where
      num is the current major release.
 
-  -r <sha>
+  -r <sha or branch>
      the rev (branch, commit, or other tag) to take as this release,
      defaults to 'master'
 
@@ -170,9 +171,21 @@ Must specify one of -M, -m, or -V.
 
   -x just do a dry run, printing what you _would_ do
 
-=head1 MAINTAINER
+=head1 EXAMPLES
 
-Robert Buels
+=head2 Without autopush
+
+=head3 make a new release tag for the Phenome component
+
+  cd Phenome;  make_release_tag.pl -M Phenome
+
+=head3 make sure the tag it just made is correct, then send it to github
+
+  git push --tags
+
+=head2 With autopush (be careful!)
+
+  cd Phenome;  make_release_tag.pl -pM Phenome
 
 =head1 AUTHOR
 
