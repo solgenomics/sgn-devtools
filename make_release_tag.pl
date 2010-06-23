@@ -82,6 +82,8 @@ if( $opt{p} ) {
     fsystem(qw( git push --tags ),
             ($opt{v} ? () : '-q'),
             $remote );
+} else {
+    print "-p not passed, skipping auto-push.  You may want to run: git push --tags\n";
 }
 
 
