@@ -30,7 +30,7 @@ If you want to do the same to other repos, add the directory names as arguments 
 my $cwd = getcwd;
 my @repos = ( qw/sgn cxgn-corelibs ITAG ITAG-analyses tomato_genome
                Phenome Cview perlcyc javacyc SMMID gff3_validator
-               sgn-home sgn-devtools art/, @ARGV);
+               biosource sgn-home sgn-devtools art/, @ARGV);
 
 for my $repo (@repos) {
     chdir $repo;
