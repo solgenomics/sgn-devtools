@@ -48,7 +48,7 @@ function d_start() {
 # Start Xvfb as X-server display #1. If it's already been started, no harm done.                                                          
    export DISPLAY=localhost:1                                                                                                            
 	echo "STARTING Xvfb..."
-	/usr/X11R6/bin/Xvfb :1 &
+	/usr/X11R6/bin/Xvfb :1 -ac &
 # Start GNU screen (hit Ctrl-A Ctrl-D to detach). Within it, start Pathway Tools.                                                         
 	echo "STARTING screen...";
 	/usr/bin/screen -d -m -L java -jar /usr/local/lib/selenium-remote-control-1.0.1/selenium-server-1.0.1/selenium-server.jar
