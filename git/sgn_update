@@ -13,9 +13,11 @@ sgn_update - A script to keep all SGN repos updated
 
 Run this script from the directory which has all of your SGN repos. It will
 stash uncommitted changes on top of whatever the current branch is in each repo,
-change to the master branch and run git pull --rebase.
+change to the master branch and run
 
-If there are conflicts during git pull --rebase, it will leave the repo in that
+    git pull --rebase origin master
+
+If there are conflicts during the rebase, it will leave the repo in that
 state.
 
 =head1 EXAMPLE
@@ -55,7 +57,7 @@ for my $repo (@repos) {
         next;
     } else {
         # We could get conflicts!
-        system("git pull --rebase");
+        system("git pull --rebase origin master");
         handle_errors($?) if $?;
 
         if( -e "Build.PL" ) {
