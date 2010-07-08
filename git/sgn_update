@@ -56,8 +56,11 @@ for my $repo (@repos) {
         chdir $cwd;
         next;
     } else {
+        # The next two commands are similar to git pull --rebase origin master
+        # except all remote branches are copied to the local index
+        system("git fetch --all");
         # We could get conflicts!
-        system("git pull --rebase origin master");
+        system("git rebase origin/master");
         handle_errors($?) if $?;
 
         if( -e "Build.PL" ) {
