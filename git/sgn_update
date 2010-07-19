@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use Cwd;
+use feature 'say';
 
 =head1 NAME
 
@@ -15,10 +16,15 @@ Run this script from the directory which has all of your SGN repos. It will
 stash uncommitted changes on top of whatever the current branch is in each repo,
 change to the master branch and run
 
-    git pull --rebase origin master
+    git fetch --all; git rebase origin/master
 
-If there are conflicts during the rebase, it will leave the repo in that
-state.
+If there are conflicts during the rebase, it will leave the repo in that state.
+
+All output is saved to the file 'sgn_update.log' in the current directory.
+Commands that are run are printed out prefixed with their current working
+directory followed by a colon, i.e :
+
+/home/foo/bar : git fetch --all
 
 =head1 EXAMPLE
 
@@ -30,6 +36,10 @@ If you want to do the same to other repos, add the directory names as arguments 
 =cut
 
 my $cwd = getcwd;
+
+# Clobber the old sgn.log
+open(my $fh, '>', 'sgn.log') or die $!;
+
 my @repos = ( qw/sgn cxgn-corelibs ITAG ITAG-analyses tomato_genome
                Phenome Cview perlcyc javacyc SMMID gff3_validator
                biosource sgn-home sgn-devtools art/, @ARGV);
@@ -50,36 +60,48 @@ for my $repo (@repos) {
     my $stashed = stash_if_necessary($repo, $status);
 
     print "Rebasing master branch of $repo from origin\n";
-    system("git checkout master");
+    run_command("git checkout master");
     if ($?) {
         handle_errors($?);
+        say "Could not checkout master branch of $repo!";
         chdir $cwd;
         next;
     } else {
         # The next two commands are similar to git pull --rebase origin master
         # except all remote branches are copied to the local index
-        system("git fetch --all");
+        run_command("git fetch --all");
+
         # We could get conflicts!
-        system("git rebase origin/master");
+        run_command("git rebase origin/master");
         handle_errors($?) if $?;
 
         if( -e "Build.PL" ) {
-            system("perl Build.PL; ./Build installdeps");
+            run_command("perl Build.PL");
+            run_command("./Build installdeps");
         }
 
-        system("git checkout $branch");
+        run_command("git checkout $branch");
         if ($?) {
             handle_errors($?);
             print "Could not change back to $branch in $repo !\n";
             chdir $cwd;
             next;
         }
-        system("git stash pop") if $stashed;
+        run_command("git stash pop") if $stashed;
     }
     chdir $cwd;
 }
 
 print "\n\nSGN repos updated! Make sure to restart Apache:\n\nsudo apache2ctl restart\n\n";
+close $fh;
+
+sub run_command {
+    my $cmd = shift;
+    my $cwd = getcwd;
+    say $cmd;
+    print $fh "$cwd : $cmd\n";
+    system("$cmd 2>&1 >> ../sgn.log");
+}
 
 sub stash_if_necessary {
     my ($repo, $status) = @_;
