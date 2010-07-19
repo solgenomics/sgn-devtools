@@ -36,9 +36,9 @@ If you want to do the same to other repos, add the directory names as arguments 
 =cut
 
 my $cwd = getcwd;
-
+my $logfile = 'sgn_update.log';
 # Clobber the old sgn.log
-open(my $fh, '>', 'sgn.log') or die $!;
+open(my $fh, '>', $logfile) or die $!;
 
 my @repos = ( qw/sgn cxgn-corelibs ITAG ITAG-analyses tomato_genome
                Phenome Cview perlcyc javacyc SMMID gff3_validator
@@ -100,7 +100,7 @@ sub run_command {
     my $cwd = getcwd;
     say $cmd;
     print $fh "$cwd : $cmd\n";
-    system("$cmd 2>&1 >> ../sgn.log");
+    system("$cmd 2>&1 >> ../$logfile");
 }
 
 sub stash_if_necessary {
