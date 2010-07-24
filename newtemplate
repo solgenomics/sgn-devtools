@@ -26,7 +26,7 @@ getopts('n',\%opt) or pod2usage(1);
 my ($tname,$newfile) = @ARGV;
 my $tgtpath = dirname($newfile);
 
-my ($sgn_tools_location) = $FindBin::RealBin =~ m!(^.+/sgn-tools)/!;
+my ($sgn_tools_location) = $FindBin::RealBin =~ m!(^.+/sgn-devtools)(/|$)!;
 $sgn_tools_location && -d $sgn_tools_location
     or die "could not figure out sgn-tools installed location";
 
