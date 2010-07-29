@@ -1,0 +1,20 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use feature 'say';
+use Cwd;
+use List::MoreUtils qw/uniq/;
+my $cwd = getcwd;
+
+my @repos = ( qw/sgn cxgn-corelibs ITAG ITAG-analyses tomato_genome
+               Phenome Cview perlcyc javacyc SMMID gff3_validator
+               biosource sgn-home sgn-devtools art ITAG1_release/, @ARGV);
+
+for my $repo (uniq @repos) {
+    chdir $repo if -e $repo;
+    next unless -e '.git';
+    chomp( my $branch = qx{ git rev-parse --symbolic-full-name HEAD } );
+    $branch =~ s!refs/heads/!!;
+    say sprintf "%20s\t%20s", $repo,  $branch;
+    chdir $cwd;
+}
