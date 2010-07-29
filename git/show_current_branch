@@ -6,6 +6,24 @@ use Cwd;
 use List::MoreUtils qw/uniq/;
 my $cwd = getcwd;
 
+=head1 NAME
+
+show_current_branch - Show the current branch for a set of git repos
+
+=cut
+
+=head1 SYNOPSIS
+
+Run this script from the directory which has all of your SGN repos. By default, it will show you the branch that each SGN repo is on. If you give any command line arguments to the script, it will show you the branch those repos are on.
+
+=head1 EXAMPLES
+
+ $ cd ~/cxgn; show_current_branch
+
+ $ cd ~/git; show_current_branch *
+
+=cut
+
 my @repos = ( qw/sgn cxgn-corelibs ITAG ITAG-analyses tomato_genome
                Phenome Cview perlcyc javacyc SMMID gff3_validator
                biosource sgn-home sgn-devtools art ITAG1_release/, @ARGV);
