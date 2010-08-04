@@ -29,7 +29,7 @@ $user .= '@' if $user;
 validate_hostname( $gateway_host );
 
 ### find an available port
-my $gateway_port = find_available_port( "$user\@$gateway_host", @allowed_gateway_ports );
+my $gateway_port = find_available_port( "$user$gateway_host", @allowed_gateway_ports );
 
 ### open the ssh connection
 print "Forwarding local port $local_port to http://$gateway_host:$gateway_port\n";
