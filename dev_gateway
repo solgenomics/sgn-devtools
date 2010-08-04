@@ -1,0 +1,102 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+
+use Pod::Usage;
+use Getopt::Long;
+
+use Socket;
+
+#use Smart::Comments;
+
+### process options
+my $gateway_host = 'sgn-devel.sgn.cornell.edu';
+my $local_port   = 80;
+my $user = '';
+my @allowed_gateway_ports = 8080..8090;
+
+GetOptions( 'port|p=i' => \$local_port,
+            'user|u=s'       => \$user,
+          )
+    or pod2usage('invalid options');
+
+$gateway_host = shift @ARGV if @ARGV;
+pod2usage() if @ARGV;
+$user .= '@' if $user;
+
+### make sure this is a valid hostname before trying the ssh commands
+# (the error checking on the ssh commands leaves a bit to be desired)
+validate_hostname( $gateway_host );
+
+### find an available port
+my $gateway_port = find_available_port( "$user\@$gateway_host", @allowed_gateway_ports );
+
+### open the ssh connection
+print "Forwarding local port $local_port to http://$gateway_host:$gateway_port\n";
+print "Press Ctrl-c to close the connection.\n";
+exec "ssh -N -R $gateway_port:localhost:$local_port '$user$gateway_host'";
+
+
+############ subroutines
+
+sub validate_hostname {
+    my $host = shift;
+    die "Could not resolve hostname $host\n" unless gethostbyname( $host );
+}
+
+sub find_available_port {
+    my ( $ssh_host, @acceptable_ports ) = @_;
+
+    ### use netstat on the remote host to find ports that are already in use
+    my %busy_ports;
+    open( my $netstat, "ssh '$user$gateway_host' 'netstat -ltunp 2>/dev/null' |" ) or die "$! running ssh\n";
+    while( <$netstat> ) {
+        #no warnings 'uninitialized';
+        my $local = ( split )[3];
+        my ($busy_port) = $local =~ /:(\d+)/
+            or next;
+        $busy_ports{$busy_port} = 1;
+    }
+
+    ### busy_ports: %busy_ports
+
+    die "Failed to connect to $user$gateway_host\n"
+        unless %busy_ports;
+
+    for( @acceptable_ports ) {
+        return $_ unless $busy_ports{$_};
+    }
+
+    die "All remote ports seem to be busy.\n",
+        "Tried ports ".join(', ',@acceptable_ports).".\n";
+}
+
+__END__
+
+=head1 NAME
+
+dev_gateway - use C<ssh> to make a remote machine act as a gateway to a local port
+
+=head1 SYNOPSIS
+
+  dev_gateway foo.example.com
+
+  dev_gateway -u bob -p 5432 foo.example.com
+
+  dev_gateway --user alice --p 3000 foo.example.com
+
+=head1 OPTIONS
+
+=over 8
+
+=item  -p --port  <num>
+
+   Port on the local machine to forward.  Default 80.
+
+=item  -u --user  <name>
+
+   Username to connect as.  Defaults to current local
+
+=back
+
+=cut
