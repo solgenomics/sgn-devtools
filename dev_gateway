@@ -91,11 +91,11 @@ dev_gateway - use C<ssh> to make a remote machine act as a gateway to a local po
 
 =item  -p --port  <num>
 
-   Port on the local machine to forward.  Default 80.
+Port on the local machine to forward.  Default 80.
 
 =item  -u --user  <name>
 
-   Username to connect as.  Defaults to current local
+Username to connect as.  Defaults to current local user.
 
 =back
 
