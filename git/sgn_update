@@ -105,7 +105,7 @@ sub run_command {
 
 sub stash_if_necessary {
     my ($repo, $status) = @_;
-    unless ($status =~ m/nothing to commit/) {
+    unless ($status =~ m/(nothing to commit|nothing added to commit)/) {
         print "Stashing work in $repo\n";
         system("git stash");
         if( $? ) {
