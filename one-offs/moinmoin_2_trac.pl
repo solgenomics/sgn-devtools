@@ -8,7 +8,6 @@ use warnings;
 
 use DBI;
 
-use English;
 use Carp;
 use FindBin;
 
@@ -21,7 +20,7 @@ use File::Spec::Functions qw/catfile/;
 
 use Data::Dumper;
 
-use CXGN::Tools::File qw/ file_contents /;
+use File::Slurp qw/ slurp /;
 
 our %opt;
 getopts('',\%opt) or pod2usage(1);
@@ -40,7 +39,7 @@ my %page_files =
         # first, assemble the full path to that file, then get the contents of that file
         my $current_revision_file = catfile( $dir_name, 'current' );
 	if( -f $current_revision_file ) {
-	    my $current_revision = file_contents( $current_revision_file );
+	    my $current_revision = slurp( $current_revision_file );
 	    $current_revision =~ s/\s//g; #remove all whitespace from what we got from that file
   
 	    if( $current_revision ) { #< if there was a current revision
