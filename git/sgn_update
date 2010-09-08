@@ -92,7 +92,7 @@ for my $repo (@repos) {
     chdir $cwd;
 }
 
-print "\n\nSGN repos updated! Make sure to restart Apache:\n\nsudo apache2ctl restart\n\n";
+print "\n\nSGN repos updated! Make sure to restart your Catalyst dev server!\n\n";
 close $fh;
 
 sub run_command {
