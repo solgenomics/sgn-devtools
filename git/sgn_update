@@ -77,7 +77,10 @@ for my $repo (@repos) {
 
         if( -e "Build.PL" ) {
             run_command("perl Build.PL");
-            run_command("./Build installdeps");
+            if (-e "Build") {
+                run_command("./Build installdeps");
+                run_command("./Build");
+            }
         }
 
         run_command("git checkout $branch");
