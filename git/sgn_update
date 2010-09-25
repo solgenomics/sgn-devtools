@@ -44,7 +44,7 @@ my @repos = ( qw/sgn cxgn-corelibs ITAG ITAG-analyses tomato_genome
                Phenome Cview perlcyc javacyc SMMID gff3_validator
                biosource sgn-home sgn-devtools art/, @ARGV);
 
-for my $repo (@repos) {
+for my $repo (grep { -d $_ } @repos) {
     chdir $repo;
     my $status = qx{ git status -u };
     chomp( my $branch = qx{ git rev-parse --symbolic-full-name HEAD } );
