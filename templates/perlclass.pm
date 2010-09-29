@@ -1,11 +1,12 @@
 package CLASSNAME;
-use Moose;
 
+use Moose;
+use namespace::autoclean;
 use Carp;
 
 =head1 NAME
 
-CLASSNAME - Blah blah
+CLASSNAME - What this class does
 
 =head1 SYNOPSIS
 
