@@ -1,0 +1,10 @@
+*~
+TAGS
+_build
+Build
+MYMETA.yml
+*.sw?
+blib/*
+.#*
+*.bak
+cover_db
