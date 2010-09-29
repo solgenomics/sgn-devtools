@@ -8,8 +8,16 @@ use lib 't/lib';
 use SGN::Test::WWW::Mechanize;
 use SGN::Test::Data qw/ create_test /;
 
-my $input_page = "/tools/convert/input.pl";
+# Examples of creating testing Bio::Chado::Schema objects
+# They are not used by the rest of this example file
+# Don't write tests that depend on production data!
+# Create test data and test against that.
 
+my $poly_cvterm     = create_test('Cv::Cvterm', { name  => 'polypeptide' });
+my $poly_feature    = create_test('Sequence::Feature', { type => $poly_cvterm });
+my $poly_featureloc = create_test('Sequence::Featureloc', { feature => $poly_feature });
+
+my $input_page = "/tools/convert/input.pl";
 my $mech = SGN::Test::WWW::Mechanize->new;
 
 for my $id_input ('TC115712',"TC115712\n","TC115710") {
