@@ -3,6 +3,6 @@ use strict;
 use warnings;
 my @filelist = split /\n/, `editfind @ARGV`;
 
-if ( $ENV{EDITOR} =~ m!/vim! || !fork ) {
+if ( $ENV{EDITOR} =~ m!/vim|^vim$! || !fork ) {
     exec $ENV{EDITOR}, @filelist;
 }
