@@ -16,8 +16,6 @@ use File::Path;
 use Getopt::Std;
 use Pod::Usage;
 
-#use Data::Dumper;
-
 our %opt;
 getopts('n',\%opt) or pod2usage(1);
 
@@ -28,7 +26,7 @@ my $tgtpath = dirname($newfile);
 
 my ($sgn_tools_location) = $FindBin::RealBin =~ m!(^.+/sgn-devtools)(/|$)!;
 $sgn_tools_location && -d $sgn_tools_location
-    or die "could not figure out sgn-tools installed location";
+    or die "could not figure out sgn-devtools installed location";
 
 my @templatematches = ( glob("~/{T,t}emplates/$tname*"),
                         glob("$sgn_tools_location/development/templates/$tname*"),
@@ -71,11 +69,11 @@ __END__
 
 =head1 NAME
 
-newtemplate - script to do something
+new_sgn_file - script to create new SGN files from templates
 
 =head1 SYNOPSIS
 
-  newtemplate [options] template_name new_filename
+  new_sgn_file [options] template_name new_filename
 
   Options:
 
@@ -83,7 +81,7 @@ newtemplate - script to do something
 
 =head1 MAINTAINER
 
-Robert Buels
+Robert Buels, Jonathan "Duke" Leto
 
 =head1 AUTHOR
 
