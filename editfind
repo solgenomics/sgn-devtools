@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use English;
 use Carp;
 use FindBin;
 use Getopt::Std;
@@ -70,7 +69,11 @@ sub resolve_perlmod {
 
   my @comp = split /:+/,$name;
   $comp[-1] .= '.pm';
-  foreach my $inc ('.','./lib',@INC) {
+
+  # so we can find modules in t/lib
+  my @test_INC = map { s|/lib$|/t/lib| } @INC;
+
+  foreach my $inc ('.','./lib',@INC, @test_INC) {
     my $fn = File::Spec->catfile($inc,@comp);
     return $fn if -f $fn;
   }
