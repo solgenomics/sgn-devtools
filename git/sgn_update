@@ -24,7 +24,7 @@ All output is saved to the file 'sgn_update.log' in the current directory.
 Commands that are run are printed out prefixed with their current working
 directory followed by a colon, i.e :
 
-/home/foo/bar : git fetch --all
+/home/foo/bar : git fetch
 
 =head1 EXAMPLE
 
@@ -69,7 +69,8 @@ for my $repo (grep { -d $_ } @repos) {
     } else {
         # The next two commands are similar to git pull --rebase origin master
         # except all remote branches are copied to the local index
-        run_command("git fetch --all");
+        # and working copy is not changed
+        run_command("git fetch");
 
         # We could get conflicts!
         run_command("git rebase origin/master");
