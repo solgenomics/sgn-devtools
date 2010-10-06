@@ -3,9 +3,11 @@ use strict;
 use warnings;
 
 use Carp;
+use Cwd;
 use Data::Dumper;
 use FindBin;
 use File::Spec;
+use File::Basename;
 use Getopt::Std;
 use List::Util qw/ min /;
 use Pod::Usage;
@@ -32,9 +34,10 @@ getopts('nMmr:V:vpx',\%opt) or pod2usage(1);
 
 $opt{M} || $opt{m} || $opt{V}
     or pod2usage('must specify either -M, -m, or -V');
-@ARGV == 1 || @ARGV == 2 or pod2usage('must provide component name, and optionally remote name');
+#@ARGV == 1 || @ARGV == 2 or pod2usage('must provide component name, and optionally remote name');
 
 my ($component_name,$remote) = @ARGV;
+$component_name = basename( getcwd() ) unless defined $component_name;
 $remote = 'origin' unless defined $remote;
 
 unless( $opt{n} ) {
@@ -136,10 +139,15 @@ make_release_tag.pl -  make a new release tag for the given software component n
 
 =head1 SYNOPSIS
 
-  cd my_component; make_release_tag.pl [options] my_component [ remote_name ]
+  cd my_component; make_release_tag.pl [options] [component_name] [remote_name]
 
   Must specify one of -M, -m, or -V.  Must be run from a working
   directory inside the git repository in question.
+
+  The default component name is the name of the current working
+  directory.
+
+  The default remote name is 'origin'.
 
   Options:
 
