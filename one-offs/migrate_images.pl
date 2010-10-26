@@ -77,8 +77,12 @@ while (my ($image_id) = $sth->fetchrow_array()) {
 	next();
     }
 
-
-    my $md5sum = $i -> calculate_md5sum($old_image_dir."/".$image_id."/".$old_image->get_original_filename().$old_image->get_file_ext());
+    my $filepath =  $old_image_dir."/".$image_id."/".$old_image->get_original_filename().$old_image->get_file_ext();
+    if (! -e $filepath) { 
+	print STDERR "WARNING! $filepath does not exist!\n";
+	next();
+    }
+    my $md5sum = $i -> calculate_md5sum($filepath);
 
     $md5sums{$md5sum}++;
     
