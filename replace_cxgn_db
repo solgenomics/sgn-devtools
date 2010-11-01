@@ -1,0 +1,44 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use autodie qw/:all/;
+
+=head1 replace_cxgn_db - replace the local cxgn database
+
+Usage:
+
+    ./replace_cxgn_db
+
+OR
+    ./replace_cxgn_db db.backup.gz
+
+=head1 WARNING
+
+This will drop your local cxgn database and repopulate it with a backup file. Don't run
+this command if you have things you want in your local db that are not in the backups!
+You have been warned.
+
+=head1 AUTHOR
+
+Jonathan "Duke" Leto
+
+=cut
+
+my $db_file = shift || 'db.cxgn.pgsql.gz';
+
+my $drop_db    = "sudo -u postgres dropdb cxgn";
+my $replace_db = "zcat $db_file | sudo -u postgres psql cxgn";
+my $new_db     = "sudo -u postgres createdb -T template0 cxgn";
+
+die "Cannot find $db_file" unless -e $db_file;
+
+print "Going to drop the cxgn database...\n";
+# We don't care if this fails
+eval { system $drop_db };
+
+print "Going to make a new cxgn database...\n";
+system $new_db;
+
+print "Going to replace the cxgn database...\n";
+system $replace_db;
