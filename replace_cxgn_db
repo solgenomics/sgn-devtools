@@ -29,7 +29,7 @@ my $db_file = shift || 'db.cxgn.pgsql.gz';
 
 my $drop_db    = "sudo -u postgres dropdb cxgn";
 my $replace_db = "zcat $db_file | sudo -u postgres psql cxgn";
-my $new_db     = "sudo -u postgres createdb -T template0 cxgn";
+my $new_db     = "sudo -u postgres createdb -E SQL_ASCII -T template0 cxgn";
 
 die "Cannot find $db_file" unless -e $db_file;
 
