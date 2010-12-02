@@ -41,8 +41,10 @@ my $logfile = 'sgn_update.log';
 open(my $fh, '>', $logfile) or die $!;
 
 my @repos = ( qw/sgn cxgn-corelibs ITAG ITAG-analyses tomato_genome
-               Phenome Cview perlcyc javacyc SMMID gff3_validator
-               biosource sgn-home sgn-devtools art/, @ARGV);
+               Phenome Cview Bio-Chado-Loader Bio-Chado-Schema
+               sgn-devtools biosource sgn-home
+               perlcyc javacyc SMMID gff3_validator
+               sgn-devtools art/, @ARGV);
 
 for my $repo (grep { -d $_ } @repos) {
     chdir $repo;
