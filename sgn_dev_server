@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ -f 'bin/sgn_server.pl' ]; then
+    SGN_TEST_MODE=1 perl bin/sgn_server.pl -d -r &> cat.log & tail -f cat.log
+else
+    echo "Run this from the base of sgn.git !"
+fi
