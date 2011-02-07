@@ -1,0 +1,31 @@
+#!perl
+
+use Modern::Perl;
+use autodie qw/:all/;
+
+=head1 sgn_deploy - Deploy SGN site to current host
+
+Use this script to deploy an already-created sgn-site debian package to the local machine.
+
+This script requires "sudo" access.
+
+=cut
+
+my ($deb) = @ARGV;
+
+die "Must specify path to debian package to deploy!" unless $deb;
+die "$deb does not exist!" unless -e $deb;
+
+my $pkg = $deb;
+$pkg =~ s/\.deb$//;
+
+my $email = 'cxgn-devel@sgn.cornell.edu';
+my $cmd =<<CMD;
+sudo dpkg -i $deb \
+&& sudo /etc/init.d/apache2 restart \
+&& mail -s "`hostname -s` updated to `basename $pkg`" $email < $pkg.changes
+CMD
+
+print "Deploying $deb with following command:\n$cmd\n";
+
+system $cmd;
