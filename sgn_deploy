@@ -21,9 +21,7 @@ $pkg =~ s/\.deb$//;
 
 my $email = 'cxgn-devel@sgn.cornell.edu';
 my $cmd =<<CMD;
-sudo dpkg -i $deb \
-&& sudo /etc/init.d/apache2 restart \
-&& mail -s "`hostname -s` updated to `basename $pkg`" $email < $pkg.changes
+sudo dpkg -i $deb && sudo /etc/init.d/apache2 restart && mail -s "`hostname -s` updated to `basename $pkg`" $email < $pkg.changes
 CMD
 
 print "Deploying $deb with following command:\n$cmd\n";
