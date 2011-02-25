@@ -1,0 +1,50 @@
+#!/usr/bin/env perl
+
+use Modern::Perl;
+use autodie qw/:all/;
+
+=head1 update_cxgn_db - update the local cxgn database
+
+Usage:
+
+    ./update_cxgn_db
+
+=head1 WARNING
+
+This will replace your local cxgn db backup with the nightly backup from eggplant using rsync --inplace to minimuze bandwidth consumption.
+
+Don't CTRL-C or kill -9 this script, or you could corrupt your local database backup.
+
+You have been warned.
+
+This script is meant to be used in conjunction with replace_cxgn_db.
+
+=head1 EXAMPLES
+
+The following command
+
+    update_cxgn_db && replace_cxgn_db
+
+will grab a nightly production snapshot of the the cxgn db from eggplant,
+drop the local cxgn database, and replace it with the nightly snapshot.
+
+This is usually much simpler (but slower and more bandwidth-consuming)
+than applying many dbpatches manually.
+
+=head1 AUTHOR
+
+Jonathan "Duke" Leto
+
+=cut
+
+my $backup = "db.cxgn.pgsql.gz";
+
+unless (-e $backup ) {
+    die "Can't find $backup to update!";
+}
+
+my $update_cmd =<<CMD;
+rsync -avz --inplace eggplant.sgn.cornell.edu:/data/prod/dumps/$backup .
+CMD
+
+system $update_cmd;
