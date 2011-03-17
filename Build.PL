@@ -1,6 +1,7 @@
 use Module::Build;
 my $build = Module::Build->new(
     module_name        => 'sgn-devtools',
+    dist_author        => 'The SGN Team',
     dist_version            => '0.01',
     license            => 'gpl',
     create_makefile_pl => 'passthrough',
