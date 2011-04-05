@@ -1,15 +1,56 @@
 #!/usr/bin/perl
+
+=head1 NAME
+
+find_mod_deps.pl - inspect *hard-coded* dependencies of sets of perl files
+
+=head1 USAGE
+
+find_mod_deps.pl [options]  [ path ... ]
+
+If given any paths, inspects only the files in those paths.  Defaults
+to inspecting all perl files in the current directory.
+
+=head2 Options
+
+=over 4
+
+=item -i
+
+If set, also print dependencies on files that are in the same
+distribution.
+
+=cut
+
 use strict;
 use warnings;
 
 use File::Find;
+use List::MoreUtils 'any';
 use Module::CoreList;
+
+use Pod::Usage;
+use Getopt::Std;
+
+my %opt;
+getopts('i', \%opt) or pod2usage();
 
 -d './lib' or -d './bin' or -d './scripts' or die "run this script from the root dir of a distribution\n";
 
 my @kinds = ( { name => 'build_requires', dir => ['t'] },
-              { name => 'requires', dir => ['lib','scripts','bin','cgi-bin'] },
+              { name => 'requires', dir => ['lib','scripts','bin','cgi-bin','Bio'] },
             );
+
+for my $dep_kind (@kinds) {
+    if( @ARGV ) {
+        my @matching = grep {
+            my $user_path = $_;
+            scalar grep index( $user_path, $_ ) == 0, @{$dep_kind->{dir}}
+        } @ARGV;
+
+        $dep_kind->{dir} = \@matching
+    }
+}
 
 #index the use and require statements as modulename => build or 
 my %uses;
@@ -55,7 +96,7 @@ for my $k (@kinds) {
 
             #skip if the module is in the distribution
             my $modfile = modfile($modname);
-            next if -f $modfile;
+            next if !$opt{i} && -f $modfile;
 
             #skip if the module is in core before 5.6
             my $rl = Module::CoreList->first_release($modname);
@@ -80,13 +121,6 @@ for my $k (@kinds) {
     }
 }
 
-
-# #@all_mods = @all_mods[0..200];
-# foreach my $mod (@all_mods) {
-#     warn "searching for uses of $mod\n";
-#     my @needs;
-#                                     #print "$mod: ".join(' ',@needs)."\n";
-# }
 
 foreach (@kinds) {
     print "$_->{name} => {\n";
