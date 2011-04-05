@@ -26,11 +26,12 @@ use strict;
 use warnings;
 
 use File::Find;
+use Getopt::Std;
+use IO::String;
 use List::MoreUtils 'any';
 use Module::CoreList;
-
+use Pod::Strip;
 use Pod::Usage;
-use Getopt::Std;
 
 my %opt;
 getopts('i', \%opt) or pod2usage();
@@ -61,7 +62,15 @@ for my $k (@kinds) {
         find( sub {
                   return unless -f && ( -x || /\.(pm|t|pl)$/ );
                   push @perlfiles, $File::Find::name;
-                  open my $p, '<', $_ or die "$! opening $File::Find::name\n";
+                  my $nopod;
+                  { open my $p, '<', $_ or die "$! opening $File::Find::name\n";
+                    local $/;
+                    my $code = <$p>;
+                    my $strip = Pod::Strip->new;
+                    $strip->output_string(\$nopod);
+                    $strip->parse_string_document( $code );
+                  }
+                  my $p = IO::String->new( \$nopod );
                   push @perl_lines, $_ while <$p>;
               },
               $_
