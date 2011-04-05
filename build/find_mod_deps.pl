@@ -28,59 +28,96 @@ use warnings;
 use File::Find;
 use Getopt::Std;
 use IO::String;
-use List::MoreUtils 'any';
+use List::MoreUtils qw/ first_value all /;
 use Module::CoreList;
 use Pod::Strip;
 use Pod::Usage;
+
+use Data::Dump 'dump';
+use Hash::Merge;
 
 my %opt;
 getopts('i', \%opt) or pod2usage();
 
 -d './lib' or -d './bin' or -d './scripts' or die "run this script from the root dir of a distribution\n";
 
-my @kinds = ( { name => 'build_requires', dir => ['t'] },
-              { name => 'requires', dir => ['lib','scripts','bin','cgi-bin','Bio'] },
+my @paths = @ARGV;
+
+@paths = qw( t lib scripts bin cgi-bin Bio )
+   unless @paths;
+
+# expand any dirs into the perl files they contain
+my @perl_files = map {
+    if( -d ) {
+        my @f;
+        find( sub { push @f, $File::Find::name if is_perl_file($_) },
+              $_,
             );
+        @f
+    } else {
+        if( is_perl_file($_) ) {
+            $_
+        } else {
+            warn "WARNING: skipping user-specified file $_, since it is not a perl file.\n";
+            ()
+        }
+    }
+} @paths;
 
-for my $dep_kind (@kinds) {
-    if( @ARGV ) {
-        my @matching = grep {
-            my $user_path = $_;
-            scalar grep index( $user_path, $_ ) == 0, @{$dep_kind->{dir}}
-        } @ARGV;
+my %perl_files = map { $_ => 1 } @perl_files;
 
-        $dep_kind->{dir} = \@matching
+my %deps;
+my $merger = Hash::Merge->new('RETAINMENT_PRECEDENT');
+for my $file ( @perl_files ) {
+    my $deps = find_deps( $file );
+    %deps = %{ $merger->merge( \%deps, $deps ) };
+}
+
+# classify the deps
+my %classified;
+for my $modname ( keys %deps ) {
+    if( all { m|^(./)?t/| } @{$deps{$modname}} ) {
+        $classified{build_requires}{$modname} = $deps{$modname};
+    } else {
+        $classified{requires}{$modname} = $deps{$modname};
     }
 }
 
-#index the use and require statements as modulename => build or 
-my %uses;
-for my $k (@kinds) {
-    my @perl_lines;
-    $k->{perlfiles} ||= do {
-        my @perlfiles;
-        find( sub {
-                  return unless -f && ( -x || /\.(pm|t|pl)$/ );
-                  push @perlfiles, $File::Find::name;
-                  my $nopod;
-                  { open my $p, '<', $_ or die "$! opening $File::Find::name\n";
-                    local $/;
-                    my $code = <$p>;
-                    my $strip = Pod::Strip->new;
-                    $strip->output_string(\$nopod);
-                    $strip->parse_string_document( $code );
-                  }
-                  my $p = IO::String->new( \$nopod );
-                  push @perl_lines, $_ while <$p>;
-              },
-              $_
-            ) for grep -d, @{$k->{dir}};
-        \@perlfiles
-    };
-    #warn Dumper $k->{perlfiles};
+print dump \%classified;
+exit;
 
-    foreach my $depline ( grep /^\s*(use|require|extends|with)\s+.+;/, @perl_lines ) {
+sub modfile {
+    my $modname = shift;
+    my $modfile = "$modname.pm";
+    $modfile =~ s|::|/|g;
+    return first_value {
+        $_ =~ /$modfile$/;
+    } @perl_files;
+}
+
+sub namespace_parent {
+    my $modname = shift;
+    $modname =~ s/(?:::)?[^:]+$//;
+    return $modname;
+}
+
+sub find_deps {
+    my ( $file ) = @_;
+
+    my $nopod;
+    { open my $p, '<', $file or die "$! reading $file\n";
+      local $/;
+      my $code = <$p>;
+      my $strip = Pod::Strip->new;
+      $strip->output_string(\$nopod);
+      $strip->parse_string_document( $code );
+    }
+    my $f = IO::String->new( \$nopod );
+
+    my %deps;
+    while( my $depline = <$f> ) {
         $depline =~ s/#.+//; #remove comments
+        next unless $depline =~ /^\s*(use|require|extends|with)\s+.+;/;
         next unless $depline && $depline =~ /\S/;
 
         my @toks = $depline =~ /([\w:]{3,})/ig
@@ -105,7 +142,7 @@ for my $k (@kinds) {
 
             #skip if the module is in the distribution
             my $modfile = modfile($modname);
-            next if !$opt{i} && -f $modfile;
+            next if !$opt{i} && $modfile && -f $modfile;
 
             #skip if the module is in core before 5.6
             my $rl = Module::CoreList->first_release($modname);
@@ -117,7 +154,7 @@ for my $k (@kinds) {
                 my $p_modfile = modfile($p);
                 #warn  "checking $p / $p_modfile\n";
 
-                next unless -f $p_modfile;
+                next unless $p_modfile && -f $p_modfile;
 
                 open my $p, '<', $p_modfile or die "$! opening $p_modfile\n";
                 while( <$p> ) {
@@ -125,29 +162,14 @@ for my $k (@kinds) {
                 }
             }
 
-            $k->{deps}{$modname} = 1;
+            push @{$deps{$modname} ||= []}, $file;
         }
     }
+
+    return \%deps;
 }
 
-
-foreach (@kinds) {
-    print "$_->{name} => {\n";
-    for (sort {lc($a) cmp lc($b)} keys %{$_->{deps}}) {
-        print "    '$_' => 0,\n"
-    }
-    print "},\n";
-}
-
-sub modfile {
-    my $modname = shift;
-    my $modfile = "./lib/$modname.pm";
-    $modfile =~ s|::|/|g;
-    return $modfile;
-}
-
-sub namespace_parent {
-    my $modname = shift;
-    $modname =~ s/(?:::)?[^:]+$//;
-    return $modname;
+sub is_perl_file {
+    local $_ = shift;
+    return -f && ( -x || /\.(pm|t|pl)$/ );
 }
