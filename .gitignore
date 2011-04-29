@@ -8,3 +8,4 @@ blib/*
 .#*
 *.bak
 cover_db
+MYMETA.json
