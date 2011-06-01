@@ -16,7 +16,9 @@ Run this script from the directory which has all of your SGN repos. It will
 stash uncommitted changes on top of whatever the current branch is in each repo,
 change to the master branch and run
 
-    git fetch --all; git rebase origin/master
+    git fetch --prune --all; git rebase origin/master
+
+followed by "./Build installdeps" to install any necessary dependencies.
 
 If there are conflicts during the rebase, it will leave the repo in that state.
 
@@ -73,7 +75,8 @@ for my $repo (grep { -d $_ } @repos) {
         # The next two commands are similar to git pull --rebase origin master
         # except all remote branches are copied to the local index
         # and working copy is not changed
-        run_command("git fetch");
+        # --prune removes remote tracking branches that no longer exist on the remote
+        run_command("git fetch --prune");
 
         # We could get conflicts!
         run_command("git rebase origin/master");
@@ -88,6 +91,7 @@ for my $repo (grep { -d $_ } @repos) {
         }
 
         run_command("git checkout $branch");
+
         if ($?) {
             handle_errors($?);
             print "Could not change back to $branch in $repo !\n";
