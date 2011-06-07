@@ -18,7 +18,7 @@ change to the master branch and run
 
     git fetch --prune --all; git rebase origin/master
 
-followed by "./Build installdeps" to install any necessary dependencies.
+followed by "cpanm --installdeps ." to install any necessary dependencies.
 
 If there are conflicts during the rebase, it will leave the repo in that state.
 
@@ -82,13 +82,7 @@ for my $repo (grep { -d $_ } @repos) {
         run_command("git rebase origin/master");
         handle_errors($?) if $?;
 
-        if( -e "Build.PL" ) {
-            run_command("perl Build.PL");
-            if (-e "Build") {
-                run_command("./Build installdeps");
-                run_command("./Build");
-            }
-        }
+        run_command("cpanm -v --installdeps .");
 
         run_command("git checkout $branch");
 
