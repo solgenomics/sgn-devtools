@@ -105,7 +105,7 @@ sub run_command {
     my $cwd = getcwd;
     say $cmd;
     print $fh "$cwd : $cmd\n";
-    system("$cmd 2>&1 >> ../$logfile");
+    system("$cmd < /dev/null 2>&1 >> ../$logfile");
 }
 
 sub stash_if_necessary {
