@@ -14,7 +14,7 @@ use Socket;
 
 ### process options
 my $gateway_host = 'sgn-devel.sgn.cornell.edu';
-my $local_port   = 80;
+my $local_port   = 3000;
 my $user = '';
 my $gateway_port;
 my @allowed_gateway_ports = 8080..8090;
@@ -118,7 +118,7 @@ dev_gateway - use C<ssh> to make a remote machine act as a gateway to a local po
 
 =item  -p --port  <num>
 
-Port on the local machine to forward.  Default 80.
+Port on the local machine to forward.  Default 3000.
 
 =item  -u --user  <name>
 
