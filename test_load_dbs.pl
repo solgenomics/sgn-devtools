@@ -26,6 +26,7 @@ while (<$F>) {
     chomp;
     my ($dbdump, $dbname) = split /\s+/;
 
+    print "Processing $dbname from dump file $dbdump\n";
     if (! -e $dbdump || -s $dbdump == 0) { 
 	print "The file $dbdump does not exist of is empty. NOT TEST LOADING $dbdump!!!\n";
 	next;
@@ -33,9 +34,10 @@ while (<$F>) {
     else { 
 	backup_db($dbdump, $dbname);
     }
-
+    print "Completed $dbname.\n\n\n";
 }
 
+print "Completed conf file $conf\n. Have a nice day!\n\n";
 
 sub backup_db { 
     my $dbdump = shift;
@@ -50,20 +52,14 @@ sub backup_db {
     ##system('echo DBDUMP = $DBDUMP');
     ##system('echo DBNAME = $DBNAME');
 
-    print "Checking if database $dbname exists, and removing it...\n";
-
-    system('sudo -u postgres psql -l | grep -q $DBNAME && sudo -u postgres dropdb -U postgres $DBNAME');    
-
-### deanx - Oct 02 2007 - originally the createdb statement was part of the DB load 
+    system('sudo -u postgres psql -l | grep -q $DBNAME && sudo -u postgres dropdb -U postgres $DBNAME');    ### deanx - Oct 02 2007 - originally the createdb statement was part of the DB load 
 #          below.  But I found that caused login/sudo confusion and failed. now
 # 	   the createdb is simply a seperate step
-    print "Create new database for the daily build of $dbdump...\n";
+#    print "Create new database for the daily build of $dbdump...\n";
     system('sudo -u postgres createdb -E SQL_ASCII $DBNAME');
 ###
 
     print  "Loading database from dump (this may take a while...)\n";
 # reload the database from file given as parameter
     system('time { zcat -f "$DBDUMP" ; echo COMMIT ; } | sudo -u postgres psql -U postgres --echo-all --variable AUTOCOMMIT=off --variable ON_ERROR_STOP=t --dbname $DBNAME > ${2:-/tmp/build_creation_log\_$DBNAME} 2>&1 || { sudo -u postgres dropdb -U postgres $DBNAME; echo Database load failed! > /dev/stderr ; exit 1; } ');
-
-    print "Done with db $dbname.\n";
 }
