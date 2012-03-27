@@ -42,7 +42,7 @@ my $logfile = 'sgn_update.log';
 # Clobber the old sgn.log
 open(my $fh, '>', $logfile) or die $!;
 
-my @repos = ( qw/sgn cxgn-corelibs ITAG tomato_genome
+my @repos = ( qw/solGS sgn cxgn-corelibs ITAG tomato_genome
                Phenome Cview bio-chado-loader bio-chado-schema
                sgn-devtools biosource sgn-home bio-gff3
                perlcyc javacyc SMMID gff3_validator yapri
