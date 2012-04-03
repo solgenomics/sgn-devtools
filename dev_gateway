@@ -43,7 +43,7 @@ is_port_available( $host, $gateway_port )
 ### open the ssh connection
 print "Forwarding local port $local_port to http://$gateway_host:$gateway_port\n";
 print "Press Ctrl-c to close the connection.\n";
-exec "ssh -N -R $gateway_port:localhost:$local_port '$user$gateway_host'";
+exec "ssh -N -R $gateway_host:$gateway_port:localhost:$local_port '$user$gateway_host'";
 
 
 ############ subroutines
