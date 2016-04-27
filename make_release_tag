@@ -30,7 +30,7 @@ sub fsystem(@) {
     }
 }
 
-getopts('nMmr:V:vpx',\%opt) or pod2usage(1);
+getopts('c:nMmr:V:vpx',\%opt) or pod2usage(1);
 
 $opt{M} || $opt{m} || $opt{V}
     or pod2usage('must specify either -M, -m, or -V');
@@ -69,9 +69,10 @@ my $minor_version = do {
 
 my $release_ref      = $opt{r} || 'master';
 my $new_release_tag  = "$component_name-$major_version.$minor_version";
+my $comment = $opt{c} ? $opt{c} : "";
 
 fsystem( 'git', 'tag',
-         -m => "$FindBin::Script: tagging $release_ref as release $new_release_tag",
+         -m => "$FindBin::Script: tagging $release_ref as release $new_release_tag $comment",
          $new_release_tag,
          $release_ref,
         );
