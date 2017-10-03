@@ -87,7 +87,6 @@ for my $repo (grep { -d $_ } @repos) {
 	    chdir '~/cxgn/sgn';	   
 	    system('perl Build.PL');
 	    system('./Build installdeps');
-	    chdir '~/cxgn/';
 	}
         run_command("git checkout $branch");
 
