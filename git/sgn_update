@@ -42,11 +42,9 @@ my $logfile = 'sgn_update.log';
 # Clobber the old sgn.log
 open(my $fh, '>', $logfile) or die $!;
 
-my @repos = ( qw/solGS sgn cxgn-corelibs rPackages ITAG tomato_genome
+my @repos = ( qw/sgn cxgn-corelibs rPackages fixture
                Phenome Cview bio-chado-loader bio-chado-schema
-               sgn-devtools biosource sgn-home bio-gff3
-               perlcyc javacyc SMMID gff3_validator yapri
-               Ambikon Ambikon-IntegrationServer catalyst-view-bio-seqio
+               sgn-devtools biosource sgn-home
                sgn-devtools art/, @ARGV);
 
 for my $repo (grep { -d $_ } @repos) {
@@ -83,7 +81,14 @@ for my $repo (grep { -d $_ } @repos) {
         handle_errors($?) if $?;
 
         run_command("cpanm -v --installdeps .");
-
+	if ($repo eq 'sgn') {
+	 
+	    print "Checking for and Installing new R packages...\n";
+	    chdir '~/cxgn/sgn';	   
+	    system('perl Build.PL');
+	    system('./Build installdeps');
+	    chdir '~/cxgn/';
+	}
         run_command("git checkout $branch");
 
         if ($?) {
