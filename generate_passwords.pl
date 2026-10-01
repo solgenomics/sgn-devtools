@@ -16,12 +16,17 @@ Lukas Mueller <lam87@cornell.edu>
 =cut
 
 use strict;
-
+use Getopt::Std;
 use Crypt::RandPasswd;
 
-my $count = shift || 1;
+our($opt_n, $opt_l);
+
+getopts('n:l:');
+
+my $count = $opt_n || 1;
+my $len = $opt_l || 8;
 
 foreach (1..$count) {
-    my $password =Crypt::RandPasswd->word( 8 , 8 );
+    my $password =Crypt::RandPasswd->word($len, $len);
     print $password."\n";
 }
