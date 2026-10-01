@@ -5,9 +5,9 @@ generate_passwords.pl - generate random passwords
 
 =head1 DESCRIPTION
 
-perl generate_passwords.pl <count>
+perl generate_passwords.pl -n <count> -l <length>
 
-Generates count random passwords, 8 letters long. Can be changed in the code. Passwords are output to STDOUT, one per line.
+Generates count random passwords, one by default, 8 letters long by default. Can be changed in the code. Passwords are output to STDOUT, one per line.
 
 =head1 AUTHOR
 
